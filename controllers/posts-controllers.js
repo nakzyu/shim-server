@@ -1,10 +1,16 @@
 const { validationResult } = require("express-validator");
 const mongooose = require("mongoose");
-
+const cloudinary = require("cloudinary");
 const HttpError = require("../models/http-error");
 
 const Post = require("../models/post");
 const User = require("../models/user");
+
+cloudinary.config({
+  cloud_name: "daokgy02f",
+  api_key: "458714275563999",
+  api_secret: "jdbtRqdsVTYR1DB2EeTmZzQYYWQ"
+});
 
 const getPostById = async (req, res, next) => {
   const postId = req.params.pid;
@@ -57,20 +63,19 @@ const getPostsByUserId = async (req, res, next) => {
 };
 
 const createPost = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(
-      new HttpError("Invalid inputs passed, please check your data.", 422)
-    );
-  }
+  const { description, creator } = req.body;
 
-  const { description, creator, image } = req.body;
+  let createdPost;
 
-  const createdPost = new Post({
-    description,
-    image,
-    creator
+  await cloudinary.uploader.upload(req.files.image.path, result => {
+    createdPost = new Post({
+      creator,
+      description,
+      image: result.url
+    });
   });
+
+  console.log(createdPost);
 
   let user;
 
