@@ -12,6 +12,18 @@ cloudinary.config({
   api_secret: "jdbtRqdsVTYR1DB2EeTmZzQYYWQ"
 });
 
+const getAllPosts = async (req, res, next) => {
+  let post;
+  try {
+    post = await Post.find();
+  } catch (err) {
+    const error = new HttpError("There is no place.", 404);
+    return next(error);
+  }
+
+  res.json({ post }); // => { post } => { post: post }
+};
+
 const getPostById = async (req, res, next) => {
   const postId = req.params.pid;
 
@@ -33,7 +45,7 @@ const getPostById = async (req, res, next) => {
     );
     return next(error);
   }
-  res.json({ post: post.toObject({ getters: true }) }); // => { post } => { post: post }
+  res.json({ posts: post.toObject({ getters: true }) }); // => { post } => { post: post }
 };
 
 const getPostsByUserId = async (req, res, next) => {
@@ -63,14 +75,15 @@ const getPostsByUserId = async (req, res, next) => {
 };
 
 const createPost = async (req, res, next) => {
-  const { description, creator } = req.body;
+  const { description, date } = req.body;
 
   let createdPost;
 
   await cloudinary.uploader.upload(req.files.image.path, result => {
     createdPost = new Post({
-      creator,
+      creator: req.userData.userId,
       description,
+      date,
       image: result.url
     });
   });
@@ -80,7 +93,7 @@ const createPost = async (req, res, next) => {
   let user;
 
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.userId);
   } catch (err) {
     const error = new HttpError("creating posts failed", 500);
     return next(error);
@@ -127,6 +140,11 @@ const updatePost = async (req, res, next) => {
     return next(error);
   }
 
+  if (post.creator.toString() !== req.userData.userId) {
+    const error = new HttpError("You are not allowed to edit this plae", 401);
+    return next(error);
+  }
+
   post.description = description;
 
   try {
@@ -155,7 +173,10 @@ const deletePost = async (req, res, next) => {
     return next(error);
   }
 
-  const imagePath = post.image;
+  if (post.creator.id !== req.userData.userId) {
+    const error = new HttpError("You are not allowed to delete this plae", 401);
+    return next(error);
+  }
 
   try {
     const sess = await mongooose.startSession();
@@ -169,13 +190,10 @@ const deletePost = async (req, res, next) => {
     return next(error);
   }
 
-  fs.unlink(imagePath, err => {
-    console.log(err);
-  });
-
   res.status(200).json({ message: "Deleted post." });
 };
 
+exports.getAllPosts = getAllPosts;
 exports.getPostById = getPostById;
 exports.getPostsByUserId = getPostsByUserId;
 exports.createPost = createPost;
