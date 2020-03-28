@@ -1,13 +1,20 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
+cloudinary.config({
+  cloud_name: "daokgy02f",
+  api_key: "458714275563999",
+  api_secret: "jdbtRqdsVTYR1DB2EeTmZzQYYWQ"
+});
+
 const getUsers = async (req, res, next) => {
   const userId = req.params.uid;
-  console.log(userId);
+
   let user;
   try {
     user = await User.findById(userId);
@@ -16,12 +23,13 @@ const getUsers = async (req, res, next) => {
     return next(error);
   }
 
-  const { image, name, description } = user;
+  const { image, name, description, posts } = user;
 
   res.json({
     image,
     name,
-    description
+    description,
+    posts
   });
 };
 
@@ -162,6 +170,74 @@ const login = async (req, res, next) => {
   });
 };
 
+const updateUserImage = async (req, res, next) => {
+  const userId = req.params.uid;
+
+  let user;
+
+  //check user exist or not
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("didn't find the user", 500);
+    return next(error);
+  }
+
+  let imageToUpdatedUrl;
+
+  await cloudinary.uploader.upload(req.files.image.path, result => {
+    imageToUpdatedUrl = result.url;
+  });
+
+  user.image = imageToUpdatedUrl;
+
+  try {
+    await user.save();
+  } catch (err) {
+    const error = new HttpError("Can't Update", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ user });
+};
+
+const updateUserDescription = async (req, res, next) => {
+  const errors = validationResult(req);
+  console.log(req.body);
+  if (!errors.isEmpty()) {
+    return next(
+      new HttpError("Invalid inputs passed, please check your data.", 422)
+    );
+  }
+
+  const { description } = req.body;
+  const userId = req.params.uid;
+  console.log(userId);
+
+  let user;
+
+  try {
+    user = await User.findById(userId);
+  } catch (err) {
+    const error = new HttpError("somethingwent wrong", 500);
+    return next(error);
+  }
+
+  console.log(user);
+  user.description = description;
+
+  try {
+    await user.save();
+  } catch (err) {
+    const error = new HttpError("S W R Couldnt update", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ user });
+};
+
 exports.getUsers = getUsers;
 exports.signup = signup;
 exports.login = login;
+exports.updateUserImage = updateUserImage;
+exports.updateUserDescription = updateUserDescription;

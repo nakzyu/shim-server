@@ -1,7 +1,10 @@
 const express = require("express");
 const { check } = require("express-validator");
+const multipart = require("connect-multiparty");
+const multipartMiddleware = multipart();
 
 const usersController = require("../controllers/users-controllers");
+const checkAuth = require("../middleware/check-auth");
 
 const router = express.Router();
 
@@ -22,5 +25,23 @@ router.post(
 );
 
 router.post("/login", usersController.login);
+
+// above is fine for everyone
+
+router.use(checkAuth);
+
+// below is token required
+
+router.patch(
+  "/updateImage/:uid",
+  multipartMiddleware,
+  usersController.updateUserImage
+);
+
+router.patch(
+  "/updateDescription/:uid",
+  check("description").isLength({ max: 26 }),
+  usersController.updateUserDescription
+);
 
 module.exports = router;
