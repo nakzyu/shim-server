@@ -35,4 +35,8 @@ router.patch(
 
 router.delete("/:pid", postsControllers.deletePost);
 
+router.post("/like/:pid", postsControllers.likePost);
+
+router.delete("/like/:pid", postsControllers.unLikePost);
+
 module.exports = router;

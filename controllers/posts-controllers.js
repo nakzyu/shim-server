@@ -193,9 +193,69 @@ const deletePost = async (req, res, next) => {
   res.status(200).json({ message: "Deleted post." });
 };
 
+const likePost = async (req, res, next) => {
+  const { userId } = req.body;
+  const postId = req.params.pid;
+
+  let post;
+  try {
+    post = await Post.findById(postId);
+  } catch (err) {
+    const error = new HttpError("somethingwent wrong", 500);
+    return next(error);
+  }
+  console.log(post);
+  console.log(userId);
+  console.log(post.likes);
+
+  post.likes.push(userId);
+
+  console.log(post.likes);
+
+  try {
+    await post.save();
+  } catch (err) {
+    const error = new HttpError("S W R Couldnt update", 500);
+    return next(error);
+  }
+
+  res.status(201).json({ userId });
+};
+
+const unLikePost = async (req, res, next) => {
+  const { userId } = req.body;
+  const postId = req.params.pid;
+
+  let post;
+  try {
+    post = await Post.findById(postId);
+  } catch (err) {
+    const error = new HttpError("somethingwent wrong", 500);
+    return next(error);
+  }
+  console.log(post);
+  console.log(userId);
+  console.log(post.likes);
+
+  post.likes.pull(userId);
+
+  console.log(post.likes);
+
+  try {
+    await post.save();
+  } catch (err) {
+    const error = new HttpError("S W R Couldnt update", 500);
+    return next(error);
+  }
+
+  res.status(201).json({ userId });
+};
+
 exports.getAllPosts = getAllPosts;
 exports.getPostById = getPostById;
 exports.getPostsByUserId = getPostsByUserId;
 exports.createPost = createPost;
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
+exports.likePost = likePost;
+exports.unLikePost = unLikePost;
