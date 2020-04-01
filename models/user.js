@@ -14,7 +14,7 @@ const userSchema = new Schema({
       "https://res.cloudinary.com/daokgy02f/image/upload/v1585382379/iconmonstr-user-20-64_zyhzxj.png",
     required: true
   },
-  description: { type: String, default: "default description", required: true }
+  description: { type: String, default: "No Message", required: true }
 });
 
 userSchema.plugin(uniqueValidator);

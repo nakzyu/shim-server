@@ -7,7 +7,7 @@ const postSchema = new Schema({
   image: { type: String, required: true },
   date: { type: String, required: true },
   creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
-  likes: [{ type: String, default: null, required: true }]
+  likedBy: [{ type: String, default: null, required: true }]
 });
 
 module.exports = mongoose.model("Post", postSchema);

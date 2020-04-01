@@ -19,7 +19,10 @@ const getUsers = async (req, res, next) => {
   try {
     user = await User.findById(userId);
   } catch (err) {
-    const error = new HttpError("Fetching user failed, please try again", 500);
+    const error = new HttpError(
+      "Fetching user failed, please try again later.",
+      500
+    );
     return next(error);
   }
 
@@ -34,6 +37,7 @@ const getUsers = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
+  console.log(req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(
@@ -47,7 +51,7 @@ const signup = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      "Signing up failed, please try again later",
+      "Signing up failed, please try again later.",
       500
     );
     return next(error);
@@ -55,7 +59,7 @@ const signup = async (req, res, next) => {
 
   if (existingUser) {
     const error = new HttpError(
-      "User exists already, please login instead",
+      "User exists already, please login instead.",
       422
     );
     return next(error);
@@ -82,7 +86,7 @@ const signup = async (req, res, next) => {
   try {
     await createdUser.save();
   } catch (err) {
-    const error = new HttpError("signing up failed", 500);
+    const error = new HttpError("Signing up failed.", 500);
     return next(error);
   }
 
@@ -114,10 +118,7 @@ const login = async (req, res, next) => {
   try {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
-    const error = new HttpError(
-      "Loggin in failed, please try again later",
-      500
-    );
+    const error = new HttpError("Need login to Like!", 422);
     return next(error);
   }
 
@@ -175,6 +176,11 @@ const updateUserImage = async (req, res, next) => {
 
   let user;
 
+  if (!req.files.image) {
+    const error = new HttpError("Please add an image.", 500);
+    return next(error);
+  }
+
   //check user exist or not
   try {
     user = await User.findById(userId);
@@ -184,17 +190,24 @@ const updateUserImage = async (req, res, next) => {
   }
 
   let imageToUpdatedUrl;
-
-  await cloudinary.uploader.upload(req.files.image.path, result => {
-    imageToUpdatedUrl = result.url;
-  });
+  try {
+    await cloudinary.uploader.upload(req.files.image.path, result => {
+      imageToUpdatedUrl = result.url;
+    });
+  } catch (err) {
+    const error = new HttpError(
+      "Could not update the image, please try again later.",
+      500
+    );
+    return next(error);
+  }
 
   user.image = imageToUpdatedUrl;
 
   try {
     await user.save();
   } catch (err) {
-    const error = new HttpError("Can't Update", 500);
+    const error = new HttpError("Could not update.", 500);
     return next(error);
   }
 
@@ -229,7 +242,7 @@ const updateUserDescription = async (req, res, next) => {
   try {
     await user.save();
   } catch (err) {
-    const error = new HttpError("S W R Couldnt update", 500);
+    const error = new HttpError("Could not update.", 500);
     return next(error);
   }
 

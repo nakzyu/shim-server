@@ -21,15 +21,14 @@ router.use(checkAuth);
 
 router.post(
   "/",
-  [check("description").isLength({ min: 5 })],
   multipartMiddleware,
+  check("description").isLength({ max: 300 }),
   postsControllers.createPost
 );
 
 router.patch(
   "/:pid",
-  [check("description").isLength({ min: 5 })],
-  multipartMiddleware,
+  [check("description").isLength({ max: 100 })],
   postsControllers.updatePost
 );
 
@@ -37,6 +36,6 @@ router.delete("/:pid", postsControllers.deletePost);
 
 router.post("/like/:pid", postsControllers.likePost);
 
-router.delete("/like/:pid", postsControllers.unLikePost);
+router.delete("/unLike/:pid", postsControllers.unLikePost);
 
 module.exports = router;
