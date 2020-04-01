@@ -7,9 +7,9 @@ const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
 cloudinary.config({
-  cloud_name: "daokgy02f",
-  api_key: "458714275563999",
-  api_secret: "jdbtRqdsVTYR1DB2EeTmZzQYYWQ"
+  cloud_name: `${process.env.CLOUDINARY_NAME}`,
+  api_key: `${process.env.CLOUDINARY_PASSWORD}`,
+  api_secret: `${process.env.CLOUDINARY_SECRET}`
 });
 
 const getUsers = async (req, res, next) => {
@@ -94,7 +94,7 @@ const signup = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email },
-      "supersecret_dont_share",
+      `${process.env.JWT_KEY}`,
       { expiresIn: "1h" }
     );
   } catch (err) {
@@ -153,7 +153,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
-      "supersecret_dont_share",
+      `${process.env.JWT_KEY}`,
       { expiresIn: "1h" }
     );
   } catch (err) {

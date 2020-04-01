@@ -7,9 +7,9 @@ const Post = require("../models/post");
 const User = require("../models/user");
 
 cloudinary.config({
-  cloud_name: "daokgy02f",
-  api_key: "458714275563999",
-  api_secret: "jdbtRqdsVTYR1DB2EeTmZzQYYWQ"
+  cloud_name: `${process.env.CLOUDINARY_NAME}`,
+  api_key: `${process.env.CLOUDINARY_PASSWORD}`,
+  api_secret: `${process.env.CLOUDINARY_SECRET}`
 });
 
 const getAllPosts = async (req, res, next) => {
