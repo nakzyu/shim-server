@@ -1,11 +1,3 @@
 {
-  "env": {
-    "DB_USER": "cha",
-    "DB_PASSWORD": "zhdwnlvkxwnl3",
-    "DB_NAME": "mern",
-    "CLOUDINARY_NAME": "daokgy02f",
-    "CLOUDINARY_KEY": "458714275563999",
-    "CLOUDINARY_SECRET": "jdbtRqdsVTYR1DB2EeTmZzQYYWQ",
-    "JWT_KEY": "supersecret_dont_share"
-  }
+  "env": {}
 }
